@@ -202,7 +202,7 @@
         }
     }
 
-    fetch('/graphql', {
+    const request = fetch('/graphql', {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',
@@ -273,109 +273,8 @@
                 }
             }
         ` }),
-    }).then((response) => {
-        response.json().then((result) => {
-            const _data = result?.data?.inventory ? result : mockedLocations;
-            const locations = getLocationsList(_data);
-
-            const getLocationById = getLocationFinderById(locations);
-
-            getUserLocation().then((data) => {
-                if (data.coords) {
-                    const distancesList = getLocationsList(mockedLocations).map(({ entityId, address }) => {
-                        return {
-                            entityId,
-                            distance: getDistanceBetweenTwoLocations(data.coords, address) };
-                    });
-
-                    const closestLocationDistance = Math.min.apply(Math, distancesList.map(({ distance }) => distance));
-
-                    const closestLocationId = distancesList.find(({ distance }) => distance === closestLocationDistance);
-
-                    const defaultLocation = getLocationById(closestLocationId.entityId);
-
-                    const locationBlock = document.getElementById('store-locator-city');
-
-                    const preferredLocationId = getPreferedLocationId();
-
-                    locationBlock.innerHTML = preferredLocationId ? getLocationById(preferredLocationId).address.city : defaultLocation.address.city;
-
-                    const input = document.getElementById('store-locator-input');
-
-                    const locationItems = locations.map(({ entityId, address: { city } }) => {
-                        return `<div data-id="${entityId}" class="serched-location-item">${city}</div>`;
-                    }).join('');
-
-                    const list = document.getElementById('store-locator-search-results');
-                    list.innerHTML = locationItems;
-
-                    input.addEventListener('input', (e) => {
-                        const value = e.target.value.toLowerCase();
-                        const resultLocations = locations.filter(({ address: { city } }) => {
-                            return (city.toLowerCase().match(value) !== null) && value.length !== 0;
-                        });
-
-                        const locationItems = resultLocations.map(({ entityId, address: { city } }) => {
-                            return `<div data-id="${entityId}" class="serched-location-item">${city}</div>`;
-                        }).join('');
-
-
-                        list.innerHTML = locationItems;
-
-                    });
-
-                    const setPreferredButton = document.getElementById('set-preferred-location-button');
-                    const setPreferredLabel = document.getElementById('preferred-location-label');
-
-                    // definition of the state of preferred location
-                    if (preferredLocationId) {
-                        setPreferredButton.style.display = 'none';
-                        setPreferredLabel.style.display = 'inline';
-                    }
-
-
-                    setPreferredButton.addEventListener('click', (event) => {
-                        setPreferredButton.style.display = 'none';
-                        setPreferredLabel.style.display = 'inline';
-
-                        window.localStorage.setItem('peferedLocationId', defaultLocation.entityId);
-                    });
-
-                    list.addEventListener('click', (event) => {
-                        const cityName = getLocationById(event.target.getAttribute('data-id'));
-
-                        setPreferredLocation(cityName);
-                    })
-                }
-            });
-        });
-    });
-
-    const setPreferredLocation = (location) => {
-        const locationBlock = document.getElementById('store-locator-city');
-
-        setPreferedLocationIdToLocalStorage(location.entityId);
-
-        locationBlock.innerHTML = location.address.city;
-    };
-
-    const setPreferedLocationIdToLocalStorage = (id) => window.localStorage.setItem('peferedLocationId', id);
-    const getPreferedLocationId = () => window.localStorage.getItem('peferedLocationId');
-
-    const getLocationsList = ({ data: { inventory: { locations: { edges } } } }) => {
-        return edges.map(({ node }) => node);
-    };
-
-    const getLocationFinderById = (locations = []) => (id) => locations.find(({ entityId }) => Number(id) === entityId);
-
-    const setInnerHTMLlocationsString = (locations = []) => {
-        const locationsSection = document.getElementById('locations-list');
-        const locationItems = locations.map(({ entityId, address: { city } }) => {
-            return `<div data-id="${entityId}">${city}</div>`;
-        }).join('');
-
-        locationsSection.innerHTML = locationItems;
-    };
+    })
+    .then((response) => response.json());
 
     const getUserLocation = () => {
         const promise = new Promise((resolve, reject) => {
@@ -391,13 +290,107 @@
         return promise;
     };
 
-    function getDistanceBetweenTwoLocations(location1, location2) {
+    Promise.all([request, getUserLocation()]).then(([result, data]) => {
+        const _data = result?.data?.inventory ? result : mockedLocations;
+        const locations = getLocationsList(_data);
+        const getLocationById = getLocationFinderById(locations);
+
+        const locationBlock = document.getElementById('store-locator-city');
+        const input = document.getElementById('store-locator-input');
+
+        if (data.coords) {
+            const distancesList = locations.map(({ entityId, address }) => {
+                return {
+                    entityId,
+                    distance: getDistanceBetweenTwoLocations(data.coords, address) };
+            });
+
+            const closestLocationDistance = Math.min.apply(Math, distancesList.map(({ distance }) => distance));
+            const closestLocationId = distancesList.find(({ distance }) => distance === closestLocationDistance);
+            const defaultLocation = getLocationById(closestLocationId.entityId);
+            const preferredLocationId = getPreferedLocationId();
+
+            locationBlock.innerHTML = preferredLocationId ? getLocationById(preferredLocationId).address.city : defaultLocation.address.city;
+
+            const searchResultsWrapper = document.getElementById('store-locator-search-results');
+
+            setInnerHTMLlocationsString(locations);
+
+
+            if (preferredLocationId) {
+                switchButtonToLabel()
+            }
+
+            input.addEventListener('input', getHandlerOfLocationFiltering(locations));
+            getSetPreferredButtonNode().addEventListener('click', handlePreferredButtonClick);
+            searchResultsWrapper.addEventListener('click', getHandlerSelectionOfPreferredLocation(getLocationById));
+        }
+    });
+
+    const getHandlerOfLocationFiltering = (locations = []) => (event) => {
+        const value = event.target.value.toLowerCase();
+        const resultLocations = locations.filter(({ address: { city } }) => {
+            return (city.toLowerCase().match(value) !== null);
+        });
+
+        setInnerHTMLlocationsString(resultLocations);
+    };
+
+    const handlePreferredButtonClick = (event) => {
+        switchButtonToLabel();
+        setPreferedLocationIdToLocalStorage(defaultLocation.entityId);
+    };
+
+    const getHandlerSelectionOfPreferredLocation = (getLocationById = () => {}) => (event) => {
+        const location = getLocationById(event.target.getAttribute('data-id'));
+
+        setPreferredLocation(location);
+    };
+
+    const switchButtonToLabel = () => {
+        const setPreferredButton = getSetPreferredButtonNode();
+        const setPreferredLabel = document.getElementById('preferred-location-label');
+
+        setPreferredButton.style.display = 'none';
+        setPreferredLabel.style.display = 'inline';
+    };
+
+    const getSetPreferredButtonNode = () => document.getElementById('set-preferred-location-button');
+
+    const setPreferredLocation = (location) => {
+        const locationBlock = document.getElementById('store-locator-city');
+
+        setPreferedLocationIdToLocalStorage(location.entityId);
+
+        locationBlock.innerHTML = location.address.city;
+    };
+
+    const setPreferedLocationIdToLocalStorage = (id) => window.localStorage.setItem('peferedLocationId', id);
+
+    const getPreferedLocationId = () => window.localStorage.getItem('peferedLocationId');
+
+    const getLocationsList = ({ data: { inventory: { locations: { edges } } } }) => {
+        return edges.map(({ node }) => node);
+    };
+
+    const getLocationFinderById = (locations = []) => (id) => locations.find(({ entityId }) => Number(id) === entityId);
+
+    const setInnerHTMLlocationsString = (locations = []) => {
+        const locationsSection = document.getElementById('store-locator-search-results');
+        const locationItems = locations.map(({ entityId, address: { city } }) => {
+            return `<div data-id="${entityId}" class="serched-location-item">${city}</div>`;
+        }).join('');
+
+        locationsSection.innerHTML = locationItems;
+    };
+
+    const getDistanceBetweenTwoLocations = (location1, location2) => {
         const { latitude: latitude1, longitude: longitude1 } = location1;
         const { latitude: latitude2, longitude: longitude2 } = location2;
-        const radlat1 = Math.PI * latitude1/180;
-        const radlat2 = Math.PI * latitude2/180;
+        const radlat1 = Math.PI * latitude1 / 180;
+        const radlat2 = Math.PI * latitude2 / 180;
         const theta = longitude1 - longitude2;
-        const radtheta = Math.PI * theta/180;
+        const radtheta = Math.PI * theta / 180;
 
         let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
 
@@ -406,9 +399,9 @@
         }
 
         dist = Math.acos(dist);
-        dist = dist * 180/Math.PI;
+        dist = dist * 180 / Math.PI;
         dist = dist * 60 * 1.1515;
     
-        return dist
-    }
+        return dist;
+    };
 </script>
