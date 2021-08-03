@@ -303,25 +303,27 @@
                 return {
                     entityId,
                     distance: getDistanceBetweenTwoLocations(data.coords, address) };
-            });
+            }).sort(({ distance: distance1 }, { distance: distance2 }) => distance1 - distance2);
 
             const closestLocationDistance = Math.min.apply(Math, distancesList.map(({ distance }) => distance));
-            const closestLocationId = distancesList.find(({ distance }) => distance === closestLocationDistance);
-            const defaultLocation = getLocationById(closestLocationId.entityId);
+            const closestLocationId = distancesList[0].entityId;
+
+            const defaultLocation = getLocationById(closestLocationId);
             const preferredLocationId = getPreferedLocationId();
 
             locationBlock.innerHTML = preferredLocationId ? getLocationById(preferredLocationId).address.city : defaultLocation.address.city;
 
             const searchResultsWrapper = document.getElementById('store-locator-search-results');
+            const sortedLocation = distancesList.map(({ entityId }) => locations.find(({ entityId: _entityId }) => _entityId === entityId));
 
-            setInnerHTMLlocationsString(locations);
+            setInnerHTMLlocationsString(sortedLocation);
 
 
             if (preferredLocationId) {
                 switchButtonToLabel()
             }
 
-            input.addEventListener('input', getHandlerOfLocationFiltering(locations));
+            input.addEventListener('input', getHandlerOfLocationFiltering(sortedLocation));
             getSetPreferredButtonNode().addEventListener('click', handlePreferredButtonClick);
             searchResultsWrapper.addEventListener('click', getHandlerSelectionOfPreferredLocation(getLocationById));
         }
