@@ -34,7 +34,7 @@ export default class Global extends PageManager {
         } = this.context;
         cartPreview(secureBaseUrl, cartId);
         quickSearch();
-        storeLocator();
+        storeLocator(this.context);
         currencySelector(cartId);
         foundation($(document));
         quickView(this.context);
