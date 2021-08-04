@@ -300,8 +300,9 @@ export default function ({ token }) {
 
             const defaultLocation = getLocationById(closestLocationId);
             const preferredLocationId = getPreferedLocationId();
+            const preferedLocation = getLocationById(preferredLocationId);
 
-            setPreferredLocation(preferredLocationId ? getLocationById(preferredLocationId) : defaultLocation);
+            setPreferredLocation(preferedLocation ? preferedLocation : defaultLocation);
 
 
             const searchResultsWrapper = document.getElementById('store-locator-search-results');
@@ -315,7 +316,7 @@ export default function ({ token }) {
             }
 
             input.addEventListener('input', getHandlerOfLocationFiltering(sortedLocation));
-            getSetPreferredButtonNode().addEventListener('click', handlePreferredButtonClick);
+            getSetPreferredButtonNode().addEventListener('click', getHandlerOfPreferredButtonClick(defaultLocation));
             searchResultsWrapper.addEventListener('click', getHandlerSelectionOfPreferredLocation(getLocationById));
         }
     });
@@ -329,9 +330,9 @@ export default function ({ token }) {
         setInnerHTMLlocationsString(resultLocations);
     };
 
-    const handlePreferredButtonClick = (event) => {
+    const getHandlerOfPreferredButtonClick = (location) => (event) => {
         switchButtonToLabel();
-        setPreferedLocationIdToLocalStorage(defaultLocation.entityId);
+        setPreferedLocationIdToLocalStorage(location.entityId);
     };
 
     const getHandlerSelectionOfPreferredLocation = (getLocationById = () => {}) => (event) => {
@@ -353,6 +354,8 @@ export default function ({ token }) {
     const setPreferredLocation = (location) => {
         const locationBlock = document.getElementById('store-locator-city');
         const storeLocatorButtonLabel = document.getElementById('store-locator-toggler-label');
+
+        console.log('location', location);
 
         storeLocatorButtonLabel.innerHTML = location.address.city;
         locationBlock.innerHTML = location.address.city;
