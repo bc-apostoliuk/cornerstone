@@ -1,16 +1,31 @@
-<div id="popoverWrapper">
-    <div class="arrow"></div>
-    <div id="locations-list" class="popover" role="tooltip">
-        <div id="store-locator-title">You`re shoping at:</div>
-        <div class="preferred-location-wrapper">
-            <h6 id="store-locator-city"></h6>
-            <input id="set-preferred-location-button" type="button" title="Set as prefered" value="Set as prefered" />
-            <span id="preferred-location-label" class="preferred-location-label"> - preferred location</span>
-        </div>
-        <div id="store-locator-search">
-            <label class="store-locator-search-label" for="store-locator-input">Change store</label>
-            <input id="store-locator-input" name="store-locator-input" />
-            <div id="store-locator-search-results"></div>
+<div>
+    <button
+        class="navUser-action navUser-action--store-locator-button"
+        type="button"
+        id="store-locator-toggler"
+        data-search="storeLocator"
+        aria-controls="storeLocator"
+        aria-label="store-locator"
+    >
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"><path d="M12 0c-4.198 0-8 3.403-8 7.602 0 4.198 3.469 9.21 8 16.398 4.531-7.188 8-12.2 8-16.398 0-4.199-3.801-7.602-8-7.602zm0 11c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"/></svg>
+    <span id="store-locator-toggler-label" class="store-locator-toggler-label">
+        Loading
+    </span>
+    </button>
+    <div id="popoverWrapper">
+        <div class="arrow"></div>
+        <div id="locations-list" class="popover" role="tooltip">
+            <div id="store-locator-title">You`re shoping at:</div>
+            <div class="preferred-location-wrapper">
+                <h6 id="store-locator-city"></h6>
+                <input id="set-preferred-location-button" type="button" title="Set as prefered" value="Set as prefered" />
+                <span id="preferred-location-label" class="preferred-location-label"> - preferred location</span>
+            </div>
+            <div id="store-locator-search">
+                <label class="store-locator-search-label" for="store-locator-input">Change store</label>
+                <input id="store-locator-input" name="store-locator-input" />
+                <div id="store-locator-search-results"></div>
+            </div>
         </div>
     </div>
 </div>

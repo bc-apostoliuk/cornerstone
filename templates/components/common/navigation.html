@@ -3,6 +3,9 @@
     {{> components/common/currency-selector}}
 
     <ul class="navUser-section navUser-section--alt">
+        <li class="navUser-item">
+            {{> components/common/store-locator}}
+        </li>
         {{#if customer.store_credit.value '>' 0}}
             <li class="navUser-item">
                 <a class="navUser-action navUser-action--storeCredit"
@@ -35,18 +38,6 @@
             </li>
             <li class="navUser-item navUser-item--divider">|</li>
         {{/if}}
-        <li class="navUser-item">
-            <button class="navUser-action"
-               type="button"
-               id="store-locator"
-               data-search="storeLocator"
-               aria-controls="storeLocator"
-               aria-label="{{lang 'common.search'}}"
-            >
-                {{lang 'common.store_locator'}}
-            </button>
-            {{> components/common/store-locator}}
-        </div>
         </li>
         <li class="navUser-item">
             <button class="navUser-action navUser-action--quickSearch"

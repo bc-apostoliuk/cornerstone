@@ -66,3 +66,8 @@
 .preferred-location-label {
     display: none;
 }
+
+#store-locator-search-results {
+    max-height: 70px;
+    overflow-y: scroll;
+}

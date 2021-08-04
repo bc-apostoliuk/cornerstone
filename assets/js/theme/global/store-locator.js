@@ -4,7 +4,7 @@ import Popover from './stencil-popover.js';
 import urlUtils from '../common/utils/url-utils';
 
 export default function ({ token }) {
-    const storeLocatorButton = document.getElementById('store-locator');
+    const storeLocatorButton = document.getElementById('store-locator-toggler');
     const template = document.getElementById('popoverWrapper');
 
     const mockedLocations = {
@@ -296,13 +296,13 @@ export default function ({ token }) {
                     distance: getDistanceBetweenTwoLocations(data.coords, address) };
             }).sort(({ distance: distance1 }, { distance: distance2 }) => distance1 - distance2);
 
-            const closestLocationDistance = Math.min.apply(Math, distancesList.map(({ distance }) => distance));
             const closestLocationId = distancesList[0].entityId;
 
             const defaultLocation = getLocationById(closestLocationId);
             const preferredLocationId = getPreferedLocationId();
 
-            locationBlock.innerHTML = preferredLocationId ? getLocationById(preferredLocationId).address.city : defaultLocation.address.city;
+            setPreferredLocation(preferredLocationId ? getLocationById(preferredLocationId) : defaultLocation);
+
 
             const searchResultsWrapper = document.getElementById('store-locator-search-results');
             const sortedLocation = distancesList.map(({ entityId }) => locations.find(({ entityId: _entityId }) => _entityId === entityId));
@@ -352,9 +352,9 @@ export default function ({ token }) {
 
     const setPreferredLocation = (location) => {
         const locationBlock = document.getElementById('store-locator-city');
+        const storeLocatorButtonLabel = document.getElementById('store-locator-toggler-label');
 
-        setPreferedLocationIdToLocalStorage(location.entityId);
-
+        storeLocatorButtonLabel.innerHTML = location.address.city;
         locationBlock.innerHTML = location.address.city;
     };
 
