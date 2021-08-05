@@ -1,5 +1,6 @@
 {{inject 'token' settings.storefront_api.token}}
-<div class="popover-container">
+
+<div class="popover-container" id="popover-container">
     <button
         id="trigger"
         data-popover-target="store-locator"
@@ -19,18 +20,16 @@
     
     <template data-popover="store-locator">
         <div class="store-locator-widget" id="store-locator-widget">
-            <div id="popoverWrapper">
-                <div id="store-locator-title">You`re shoping at:</div>
-                <div class="preferred-location-wrapper">
-                    <h6 id="store-locator-city"></h6>
-                    <input id="set-preferred-location-button" type="button" title="Set as prefered" value="Set as prefered" />
-                    <span id="preferred-location-label" class="preferred-location-label"> - preferred location</span>
-                </div>
-                <div id="store-locator-search">
-                    <label class="store-locator-search-label" for="store-locator-input">Filter location</label>
-                    <input id="store-locator-input" name="store-locator-input" />
-                    <div id="store-locator-search-results"></div>
-                </div>
+            <div id="store-locator-title">You`re shoping at:</div>
+            <div class="preferred-location-wrapper">
+                <h6 id="store-locator-city"></h6>
+                <input id="set-preferred-location-button" type="button" title="Set as prefered" value="Set as prefered" />
+                <span id="preferred-location-label" class="preferred-location-label"> - preferred location</span>
+            </div>
+            <div id="store-locator-search">
+                <label class="store-locator-search-label" for="store-locator-input">Filter location</label>
+                <input id="store-locator-input" name="store-locator-input" />
+                <div id="store-locator-search-results"></div>
             </div>
         </div>
     </template>

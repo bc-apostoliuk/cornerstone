@@ -8,11 +8,12 @@ const isInViewport = (element) => {
         rect.right <= (window.innerWidth || html.clientWidth);
 }
 export default class Popover {
-    constructor(trigger, { position = 'top', className = 'popover' }) {
+    constructor(trigger, { position = 'top', className = 'popover', wrapperId = 'popover-container' }) {
         this.trigger = trigger;
         this.position = position;
         this.className = className;
         this.orderedPositions = ['top', 'right', 'bottom', 'left'];
+        this.wrapperId = wrapperId;
     
         const popoverTemplate = document.querySelector(`[data-popover=${trigger.dataset.popoverTarget}]`);
         this.popover = document.createElement('div');
@@ -31,11 +32,18 @@ export default class Popover {
             }
         };
   
-        this.handleDocumentEvent = (evt) => {
-            const target = $(evt.target);  
-
+        this.handleDocumentEvent = ({ target }) => {
+            const isClickWithinPopup = document.getElementById('store-locator-widget').contains(target);
+            const isClickWithinPopupWrapper = document.getElementById(this.wrapperId).contains(target);
+            
             if (
-                this.isVisible && evt.target !== this.trigger && evt.target !== this.popover && target.parent('#store-locator-widget').length
+                this.isVisible
+                && target
+                !== this.trigger
+                && target
+                !== this.popover
+                && !isClickWithinPopupWrapper
+                && !isClickWithinPopup
             ) {
                 this.popover.remove();
             }
