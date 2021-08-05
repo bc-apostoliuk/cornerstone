@@ -3,192 +3,8 @@ import utils from '@bigcommerce/stencil-utils';
 import Popover from './stencil-popover.js';
 import urlUtils from '../common/utils/url-utils';
 
+
 export default function ({ token }) {
-    const storeLocatorButton = document.getElementById('store-locator-toggler');
-    const template = document.getElementById('popoverWrapper');
-
-    const mockedLocations = {
-        "data": {
-            "inventory": {
-            "locations": {
-                "edges": [
-                {
-                    "node": {
-                    "entityId": 1,
-                    "code": "123",
-                    "description": "asdasd",
-                    "label": "a",
-                    "typeId": "PHYSICAL",
-                    "address": {
-                        "code": "BC-ADDRESS-1",
-                        "address1": "123",
-                        "city": "London",
-                        "stateOrProvince": "asdasdasdas",
-                        "countryCode": "JM",
-                        "phone": "",
-                        "email": "asdasd@mail.com",
-                        "latitude": 51.5074,
-                        "longitude": 0.1278
-                    },
-                    "operatingHours": {
-                        "sunday": {
-                        "open": true,
-                        "opening": "02:00",
-                        "closing": "00:00"
-                        },
-                        "monday": {
-                        "open": true,
-                        "opening": "00:30",
-                        "closing": "02:30"
-                        },
-                        "thursday": {
-                        "open": true,
-                        "opening": "01:30",
-                        "closing": "01:30"
-                        },
-                        "wednesday": {
-                        "open": false,
-                        "opening": "",
-                        "closing": ""
-                        },
-                        "tuesday": {
-                        "open": false,
-                        "opening": "01:00",
-                        "closing": "01:30"
-                        },
-                        "friday": {
-                        "open": false,
-                        "opening": "02:00",
-                        "closing": "01:00"
-                        },
-                        "saturday": {
-                        "open": false,
-                        "opening": "",
-                        "closing": ""
-                        }
-                    }
-                    }
-                },
-                {
-                    "node": {
-                    "entityId": 29,
-                    "code": "123123",
-                    "description": null,
-                    "label": "Test",
-                    "typeId": "PHYSICAL",
-                    "address": {
-                        "code": "67d6114c-2f35-4bd7-9f10-b69e8b5bf1c2",
-                        "address1": "123",
-                        "city": "Ternopil",
-                        "stateOrProvince": "12",
-                        "countryCode": "AL",
-                        "phone": "123",
-                        "email": "asdasd@asda.cm",
-                        "latitude": 49.5535,
-                        "longitude": 25.5948
-                    },
-                    "operatingHours": {
-                        "sunday": {
-                        "open": false,
-                        "opening": "",
-                        "closing": ""
-                        },
-                        "monday": {
-                        "open": false,
-                        "opening": "",
-                        "closing": ""
-                        },
-                        "thursday": {
-                        "open": false,
-                        "opening": "",
-                        "closing": ""
-                        },
-                        "wednesday": {
-                        "open": false,
-                        "opening": "",
-                        "closing": ""
-                        },
-                        "tuesday": {
-                        "open": false,
-                        "opening": "",
-                        "closing": ""
-                        },
-                        "friday": {
-                        "open": false,
-                        "opening": "",
-                        "closing": ""
-                        },
-                        "saturday": {
-                        "open": false,
-                        "opening": "",
-                        "closing": ""
-                        }
-                    }
-                    }
-                },
-                {
-                    "node": {
-                    "entityId": 31,
-                    "code": "1231234535435",
-                    "description": null,
-                    "label": "Test",
-                    "typeId": "PHYSICAL",
-                    "address": {
-                        "code": "816292f7-821e-44bf-a19c-c32dc70ca7b1",
-                        "address1": "Test address",
-                        "city": "Kyiv",
-                        "stateOrProvince": "asdsad",
-                        "countryCode": "AL",
-                        "phone": "",
-                        "email": "asdasd@mail.com",
-                        "latitude": 50.4501,
-                        "longitude": 30.5234
-                    },
-                    "operatingHours": {
-                        "sunday": {
-                        "open": false,
-                        "opening": "00:00",
-                        "closing": "00:00"
-                        },
-                        "monday": {
-                        "open": true,
-                        "opening": "09:00",
-                        "closing": "17:00"
-                        },
-                        "thursday": {
-                        "open": true,
-                        "opening": "09:00",
-                        "closing": "17:00"
-                        },
-                        "wednesday": {
-                        "open": true,
-                        "opening": "09:00",
-                        "closing": "17:00"
-                        },
-                        "tuesday": {
-                        "open": true,
-                        "opening": "09:00",
-                        "closing": "17:00"
-                        },
-                        "friday": {
-                        "open": true,
-                        "opening": "09:00",
-                        "closing": "17:00"
-                        },
-                        "saturday": {
-                        "open": false,
-                        "opening": "00:00",
-                        "closing": "00:00"
-                        }
-                    }
-                    }
-                }
-                ]
-            }
-            }
-        }
-    }
-
     const request = fetch('/graphql', {
         method: 'POST',
         headers: {
@@ -278,47 +94,52 @@ export default function ({ token }) {
     };
 
     Promise.all([request, getUserLocation()]).then(([result, data]) => {
-        const pop = new Popover(template, storeLocatorButton, {
-            position: Popover.BOTTOM
-        });
-
         const _data = result?.data?.inventory ? result : mockedLocations;
         const locations = getLocationsList(_data);
         const getLocationById = getLocationFinderById(locations);
+        const distancesList = locations.map(({ entityId, address }) => {
+            return {
+                entityId,
+                distance: getDistanceBetweenTwoLocations(data.coords, address) };
+        }).sort(({ distance: distance1 }, { distance: distance2 }) => distance1 - distance2);
+        const closestLocationId = distancesList[0].entityId;
+        const defaultLocation = getLocationById(closestLocationId);
+        const sortedLocation = distancesList.map(({ entityId }) => locations.find(({ entityId: _entityId }) => _entityId === entityId));
+        const preferredLocationId = getPreferedLocationId();
+        const preferedLocation = getLocationById(preferredLocationId);
 
-        const locationBlock = document.getElementById('store-locator-city');
-        const input = document.getElementById('store-locator-input');
+        const trigger = document.getElementById('trigger');
+        let popover = new Popover(trigger, { position: 'bottom' });
 
-        if (data.coords) {
-            const distancesList = locations.map(({ entityId, address }) => {
-                return {
-                    entityId,
-                    distance: getDistanceBetweenTwoLocations(data.coords, address) };
-            }).sort(({ distance: distance1 }, { distance: distance2 }) => distance1 - distance2);
+        setPreferredLocation(preferedLocation ? preferedLocation : defaultLocation);
 
-            const closestLocationId = distancesList[0].entityId;
-
-            const defaultLocation = getLocationById(closestLocationId);
+        trigger.addEventListener('click', () => {
             const preferredLocationId = getPreferedLocationId();
             const preferedLocation = getLocationById(preferredLocationId);
+            popover.toggle();
 
-            setPreferredLocation(preferedLocation ? preferedLocation : defaultLocation);
-
-
-            const searchResultsWrapper = document.getElementById('store-locator-search-results');
-            const sortedLocation = distancesList.map(({ entityId }) => locations.find(({ entityId: _entityId }) => _entityId === entityId));
-
-            setInnerHTMLlocationsString(sortedLocation);
-
-
-            if (preferredLocationId) {
-                switchButtonToLabel()
+            const input = document.getElementById('store-locator-input');
+    
+            if (data.coords && popover.isVisible) {
+    
+                setPreferredLocation(preferedLocation ? preferedLocation : defaultLocation);
+    
+                const searchResultsWrapper = document.getElementById('store-locator-search-results');
+                
+    
+                setInnerHTMLLocationsString(sortedLocation);
+    
+    
+                if (preferredLocationId) {
+                    switchButtonToLabel()
+                }
+    
+                input.addEventListener('input', getHandlerOfLocationFiltering(sortedLocation));
+                getSetPreferredButtonNode().addEventListener('click', getHandlerOfPreferredButtonClick(defaultLocation));
+                searchResultsWrapper.addEventListener('click', getHandlerSelectionOfPreferredLocation(getLocationById));
             }
-
-            input.addEventListener('input', getHandlerOfLocationFiltering(sortedLocation));
-            getSetPreferredButtonNode().addEventListener('click', getHandlerOfPreferredButtonClick(defaultLocation));
-            searchResultsWrapper.addEventListener('click', getHandlerSelectionOfPreferredLocation(getLocationById));
-        }
+            
+        });
     });
 
     const getHandlerOfLocationFiltering = (locations = []) => (event) => {
@@ -327,12 +148,12 @@ export default function ({ token }) {
             return (city.toLowerCase().match(value) !== null);
         });
 
-        setInnerHTMLlocationsString(resultLocations);
+        setInnerHTMLLocationsString(resultLocations);
     };
 
     const getHandlerOfPreferredButtonClick = (location) => (event) => {
-        switchButtonToLabel();
         setPreferedLocationIdToLocalStorage(location.entityId);
+        switchButtonToLabel();
     };
 
     const getHandlerSelectionOfPreferredLocation = (getLocationById = () => {}) => (event) => {
@@ -355,10 +176,15 @@ export default function ({ token }) {
         const locationBlock = document.getElementById('store-locator-city');
         const storeLocatorButtonLabel = document.getElementById('store-locator-toggler-label');
 
-        console.log('location', location);
+        setPreferedLocationIdToLocalStorage(location.entityId);
+
 
         storeLocatorButtonLabel.innerHTML = location.address.city;
-        locationBlock.innerHTML = location.address.city;
+
+        if (locationBlock) {
+            locationBlock.innerHTML = location.address.city;
+        }
+
     };
 
     const setPreferedLocationIdToLocalStorage = (id) => window.localStorage.setItem('peferedLocationId', id);
@@ -371,7 +197,7 @@ export default function ({ token }) {
 
     const getLocationFinderById = (locations = []) => (id) => locations.find(({ entityId }) => Number(id) === entityId);
 
-    const setInnerHTMLlocationsString = (locations = []) => {
+    const setInnerHTMLLocationsString = (locations = []) => {
         const locationsSection = document.getElementById('store-locator-search-results');
         const locationItems = locations.map(({ entityId, address: { city } }) => {
             return `<div data-id="${entityId}" class="serched-location-item">${city}</div>`;
@@ -401,3 +227,185 @@ export default function ({ token }) {
         return dist;
     };
 }
+
+const mockedLocations = {
+    "data": {
+        "inventory": {
+        "locations": {
+            "edges": [
+            {
+                "node": {
+                "entityId": 1,
+                "code": "123",
+                "description": "asdasd",
+                "label": "a",
+                "typeId": "PHYSICAL",
+                "address": {
+                    "code": "BC-ADDRESS-1",
+                    "address1": "123",
+                    "city": "London",
+                    "stateOrProvince": "asdasdasdas",
+                    "countryCode": "JM",
+                    "phone": "",
+                    "email": "asdasd@mail.com",
+                    "latitude": 51.5074,
+                    "longitude": 0.1278
+                },
+                "operatingHours": {
+                    "sunday": {
+                    "open": true,
+                    "opening": "02:00",
+                    "closing": "00:00"
+                    },
+                    "monday": {
+                    "open": true,
+                    "opening": "00:30",
+                    "closing": "02:30"
+                    },
+                    "thursday": {
+                    "open": true,
+                    "opening": "01:30",
+                    "closing": "01:30"
+                    },
+                    "wednesday": {
+                    "open": false,
+                    "opening": "",
+                    "closing": ""
+                    },
+                    "tuesday": {
+                    "open": false,
+                    "opening": "01:00",
+                    "closing": "01:30"
+                    },
+                    "friday": {
+                    "open": false,
+                    "opening": "02:00",
+                    "closing": "01:00"
+                    },
+                    "saturday": {
+                    "open": false,
+                    "opening": "",
+                    "closing": ""
+                    }
+                }
+                }
+            },
+            {
+                "node": {
+                "entityId": 29,
+                "code": "123123",
+                "description": null,
+                "label": "Test",
+                "typeId": "PHYSICAL",
+                "address": {
+                    "code": "67d6114c-2f35-4bd7-9f10-b69e8b5bf1c2",
+                    "address1": "123",
+                    "city": "Ternopil test",
+                    "stateOrProvince": "12",
+                    "countryCode": "AL",
+                    "phone": "123",
+                    "email": "asdasd@asda.cm",
+                    "latitude": 49.5535,
+                    "longitude": 25.5948
+                },
+                "operatingHours": {
+                    "sunday": {
+                    "open": false,
+                    "opening": "",
+                    "closing": ""
+                    },
+                    "monday": {
+                    "open": false,
+                    "opening": "",
+                    "closing": ""
+                    },
+                    "thursday": {
+                    "open": false,
+                    "opening": "",
+                    "closing": ""
+                    },
+                    "wednesday": {
+                    "open": false,
+                    "opening": "",
+                    "closing": ""
+                    },
+                    "tuesday": {
+                    "open": false,
+                    "opening": "",
+                    "closing": ""
+                    },
+                    "friday": {
+                    "open": false,
+                    "opening": "",
+                    "closing": ""
+                    },
+                    "saturday": {
+                    "open": false,
+                    "opening": "",
+                    "closing": ""
+                    }
+                }
+                }
+            },
+            {
+                "node": {
+                "entityId": 31,
+                "code": "1231234535435",
+                "description": null,
+                "label": "Test",
+                "typeId": "PHYSICAL",
+                "address": {
+                    "code": "816292f7-821e-44bf-a19c-c32dc70ca7b1",
+                    "address1": "Test address",
+                    "city": "Kyiv",
+                    "stateOrProvince": "asdsad",
+                    "countryCode": "AL",
+                    "phone": "",
+                    "email": "asdasd@mail.com",
+                    "latitude": 50.4501,
+                    "longitude": 30.5234
+                },
+                "operatingHours": {
+                    "sunday": {
+                    "open": false,
+                    "opening": "00:00",
+                    "closing": "00:00"
+                    },
+                    "monday": {
+                    "open": true,
+                    "opening": "09:00",
+                    "closing": "17:00"
+                    },
+                    "thursday": {
+                    "open": true,
+                    "opening": "09:00",
+                    "closing": "17:00"
+                    },
+                    "wednesday": {
+                    "open": true,
+                    "opening": "09:00",
+                    "closing": "17:00"
+                    },
+                    "tuesday": {
+                    "open": true,
+                    "opening": "09:00",
+                    "closing": "17:00"
+                    },
+                    "friday": {
+                    "open": true,
+                    "opening": "09:00",
+                    "closing": "17:00"
+                    },
+                    "saturday": {
+                    "open": false,
+                    "opening": "00:00",
+                    "closing": "00:00"
+                    }
+                }
+                }
+            }
+            ]
+        }
+        }
+    }
+};

@@ -3,9 +3,12 @@
     {{> components/common/currency-selector}}
 
     <ul class="navUser-section navUser-section--alt">
-        <li class="navUser-item">
-            {{> components/common/store-locator}}
-        </li>
+        <!-- @todo: here sould be used Enable/disable the store locator flag that is maneged by MERCHANT -->
+        {{#if true}}
+            <li class="navUser-item">
+                {{> components/common/store-locator}}
+            </li>
+        {{/if}}
         {{#if customer.store_credit.value '>' 0}}
             <li class="navUser-item">
                 <a class="navUser-action navUser-action--storeCredit"

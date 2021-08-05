@@ -1,0 +1,49 @@
+// =============================================================================
+// STORE LOCATOR (CSS)
+// =============================================================================
+
+
+.store-locator-search-label {
+    display: block;
+}
+
+.store-locator-value {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+#store-locator-city {
+    margin: 0;
+    font-weight: 900;
+    margin-right: 15px;
+}
+
+#store-locator-input {
+    width: 100%;
+}
+
+.serched-location-item {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+}
+
+.serched-location-item:hover {
+    background-color: stencilColor('banner--deafault-backgroundColor');
+    color: stencilColor('color-white');
+}
+
+.preferred-location-wrapper {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.preferred-location-label {
+    display: none;
+}
+
+#store-locator-search-results {
+    max-height: 105px;
+    overflow-y: scroll;
+}

@@ -1,97 +1,124 @@
+const isInViewport = (element) => {
+    const rect = element.getBoundingClientRect();
+    const html = document.documentElement;
+
+    return rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || html.clientHeight) &&
+        rect.right <= (window.innerWidth || html.clientWidth);
+}
 export default class Popover {
-    constructor(element, trigger, options) {
-    this.options = {
-        position: Popover.BOTTOM
-    };
-    this.element = element;
-    this.trigger = trigger;
-    this._isOpen = false;
-    Object.assign(this.options, options);
-    this.events();
-    this.initialPosition();
+    constructor(trigger, { position = 'top', className = 'popover' }) {
+        this.trigger = trigger;
+        this.position = position;
+        this.className = className;
+        this.orderedPositions = ['top', 'right', 'bottom', 'left'];
+    
+        const popoverTemplate = document.querySelector(`[data-popover=${trigger.dataset.popoverTarget}]`);
+        this.popover = document.createElement('div');
+
+        this.popover.innerHTML = popoverTemplate.innerHTML;
+    
+        Object.assign(this.popover.style, {
+            position: 'fixed'
+        });
+  
+        this.popover.classList.add(className);
+    
+        this.handleWindowEvent = () => {
+            if (this.isVisible) {
+                this.show();
+            }
+        };
+  
+        this.handleDocumentEvent = (evt) => {
+            const target = $(evt.target);  
+
+            if (
+                this.isVisible && evt.target !== this.trigger && evt.target !== this.popover && target.parent('#store-locator-widget').length
+            ) {
+                this.popover.remove();
+            }
+        };
     }
-
-    events() {
-        this.trigger.addEventListener('click', this.toggle.bind(this));
+  
+    get isVisible() {
+        return document.body.contains(this.popover);
     }
+  
+    show() {
+        document.addEventListener('click', this.handleDocumentEvent);
+        window.addEventListener('scroll', this.handleWindowEvent);
+        window.addEventListener('resize', this.handleWindowEvent);
+    
+        document.body.appendChild(this.popover);
+    
+        const { top: triggerTop, left: triggerLeft } = this.trigger.getBoundingClientRect();
+        const { offsetHeight: triggerHeight, offsetWidth: triggerWidth } = this.trigger;
+        const { offsetHeight: popoverHeight, offsetWidth: popoverWidth } = this.popover;
+    
+        const positionIndex = this.orderedPositions.indexOf(this.position);
+  
+        const positions = {
+            top: {
+                name: 'top',
+                top: triggerTop - popoverHeight,
+                left: triggerLeft - ((popoverWidth - triggerWidth) / 2)
+            },
+            right: {
+                name: 'right',
+                top: triggerTop - ((popoverHeight - triggerHeight) / 2),
+                left: triggerLeft + triggerWidth
+            },
+            bottom: {
+                name: 'bottom',
+                top: triggerTop + triggerHeight,
+                left: triggerLeft - ((popoverWidth - triggerWidth) / 2)
+            },
+            left: {
+                name: 'left',
+                top: triggerTop - ((popoverHeight - triggerHeight) / 2),
+                left: triggerLeft - popoverWidth
+            },
+        };
+  
+        const position = this.orderedPositions
+            .slice(positionIndex)
+            .concat(this.orderedPositions.slice(0, positionIndex))
+            .map(pos => positions[pos])
+            .find(pos => {
+                this.popover.style.top = `${pos.top}px`;
+                this.popover.style.left = `${pos.left}px`;
 
-    initialPosition() {
-        let triggerRect = this.trigger.getBoundingClientRect();
-
-        this.element.style.display = 'none';
-        this.element.style.top = triggerRect.top + 'px';
-        this.element.style.left = triggerRect.left + 'px';
-    }
-
-    toggle(e) {
-        e.stopPropagation();
-        if (this._isOpen) {
-        this.close(e);
+                return isInViewport(this.popover);
+            });
+  
+        this.orderedPositions.forEach(pos => {
+            this.popover.classList.remove(`${this.className}--${pos}`);
+        });
+  
+        if (position) {
+            this.popover.classList.add(`${this.className}--${position.name}`);
         } else {
-        this.element.style.display = 'block';
-        this._isOpen = true;
-        this.outsideClick();
-        this.position();
+            this.popover.style.top = positions.bottom.top;
+            this.popover.style.left = positions.bottom.left;
+            this.popover.classList.add(`${this.className}--bottom`);
         }
     }
-
-    targetIsInsideElement(e) {
-        let target = e.target;
-
-        if (target) {
-            do {
-                if (target === this.element) {
-                    return true;
-                }
-            } while (target = target.parentNode);
-        }
-        return false;
+  
+    destroy() {
+        this.popover.remove();
+    
+        document.removeEventListener('click', this.handleDocumentEvent);
+        window.removeEventListener('scroll', this.handleWindowEvent);
+        window.removeEventListener('resize', this.handleWindowEvent);
     }
-
-    close(e) {
-        if (!this.targetIsInsideElement(e)) {
-            this.element.style.display = 'none';
-            this._isOpen = false;
-            this.killOutSideClick();
-        }
-    }
-
-    position(overridePosition) {
-        let triggerRect = this.trigger.getBoundingClientRect(),
-        elementRect = this.element.getBoundingClientRect(),
-        position = overridePosition || this.options.position;
-        this.element.classList.remove(Popover.TOP, Popover.BOTTOM, Popover.LEFT, Popover.RIGHT); // remove all possible values
-        this.element.classList.add(position);
-
-        if (position.indexOf(Popover.BOTTOM) !== -1) {
-            this.element.style.left = ~~triggerRect.left + ~~((triggerRect.width / 2) - ~~(elementRect.width / 2)) + 'px';
-            this.element.style.top = ~~triggerRect.bottom + 10 + 'px';
-        } else if (position.indexOf(Popover.TOP) !== -1) {
-            this.element.style.left = ~~triggerRect.left + ~~((triggerRect.width / 2) - ~~(elementRect.width / 2)) + 'px';
-            this.element.style.top = ~~(triggerRect.top - elementRect.height) + 'px';
-        } else if (position.indexOf(Popover.LEFT) !== -1) {
-            this.element.style.top = ~~((triggerRect.top + triggerRect.height / 2) - ~~(elementRect.height / 2)) + 'px';
-            this.element.style.left = ~~(triggerRect.left - elementRect.width) + 'px';
+  
+    toggle() {
+        if (this.isVisible) {
+            this.destroy();
         } else {
-            this.element.style.top = ~~((triggerRect.top + triggerRect.height / 2) - ~~(elementRect.height / 2)) + 'px';
-            this.element.style.left = ~~triggerRect.right + 'px';
+            this.show();
         }
-    }
-
-    outsideClick() {
-        document.addEventListener('click', this.close.bind(this));
-    }
-
-    killOutSideClick() {
-        document.removeEventListener('click', this.close.bind(this));
-    }
-
-    isOpen() {
-        return this._isOpen;
     }
 }
-
-Popover.TOP = 'top';
-Popover.RIGHT = 'right';
-Popover.BOTTOM = 'bottom';
-Popover.LEFT = 'left';
