@@ -27,6 +27,12 @@
     }
 }
 
+.modal--medium {
+    @include breakpoint("medium") {
+        width: $modal-width--medium;
+    }
+}
+
 .modal-header {
     padding-left: $reveal-modal-paddingHorizontal;
     padding-right: remCalc($reveal-close-height) + $reveal-close-side;
