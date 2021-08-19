@@ -1,6 +1,6 @@
 <div class="product-delivery-radio">
     <div class="product-delivery-radio__item">
-        <input type="radio" checked="checked" name="delivery">
+        <input type="radio" checked="checked" value="delivery" name="delivery" product-delivery-radio-change>
         <label for="delivery"></label>
         <span class="product-delivery-radio__checkmark"></span>
         <div class="product-delivery-radio__item__content">
@@ -13,17 +13,25 @@
         </div>
     </div>
     <div class="product-delivery-radio__item">
-        <input type="radio" name="delivery">
+        <input type="radio" name="delivery" value="pick-up" product-delivery-radio-change>
         <label for="delivery"></label>
         <span class="product-delivery-radio__checkmark"></span>
         <div class="product-delivery-radio__item__content">
             <div class="product-delivery-radio__item__content--left">
-                <div class="product-delivery-radio__item__title">Delivery</div>
+                <div class="product-delivery-radio__item__title">Pickup in store</div>
                 <div class="product-delivery-radio__item__sub-title">George street, Open until 6:00 pm </div>
             </div>
             <div class="product-delivery-radio__item__content--right">
-                <div class="product-delivery-radio__item__title product-delivery-radio__item__title--success">5 in stock</div>
+                <div class="product-delivery-radio__item__title product-delivery-radio__item__title--warning">!5 in stock</div>
+                <a href="https://www.google.com/">More available at other stores</a>
             </div>
         </div>
     </div>
 </div>
+
+<!-- {{inject 'testtest' product.price.without_tax.formatted}}
+
+<script>
+    var jsContext = JSON.parse({{jsContext}});
+    console.log('jsContext', jsContext)
+</script> -->

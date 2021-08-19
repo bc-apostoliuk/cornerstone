@@ -15,7 +15,7 @@
                 color: #D43A3A;
             }
             &--warning {
-                color: grey;
+                color: $color-info;
             }
             &--success {
                 color: green;
@@ -32,6 +32,13 @@
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
+                & > a {
+                    z-index: 2;
+                }
+            }
+
+            &--right {
+                align-items: flex-end;
             }
         }
 

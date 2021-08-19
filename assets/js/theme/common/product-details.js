@@ -33,6 +33,7 @@ export default class ProductDetails extends ProductDetailsBase {
         });
 
         const $productOptionsElement = $('[data-product-option-change]', $form);
+        const $deliveryMethodChange = $('[product-delivery-radio-change]');
         const hasOptions = $productOptionsElement.html().trim().length;
         const hasDefaultOptions = $productOptionsElement.find('[data-default]').length;
         const $productSwatchGroup = $('[id*="attribute_swatch"]', $form);
@@ -76,6 +77,16 @@ export default class ProductDetails extends ProductDetailsBase {
             this.setProductVariant();
         });
 
+        $deliveryMethodChange.on('change', (e) => {
+            if (e.target.value === 'delivery') {
+                // @todo: set as delivery
+            } else {
+                // @todo: set as pick-up
+            }
+
+            console.log(e.target.value);
+        })
+
         $form.on('submit', event => {
             this.addToCartValidator.performCheck();
 
@@ -88,6 +99,7 @@ export default class ProductDetails extends ProductDetailsBase {
         // or have default variant properties that change the view
         if ((isEmpty(productAttributesData) || hasDefaultOptions) && hasOptions) {
             const $productId = $('[name="product_id"]', $form).val();
+            console.log('optionChangeDecorator', optionChangeDecorator);
             const optionChangeCallback = optionChangeDecorator.call(this, hasDefaultOptions);
 
             utils.api.productAttributes.optionChange($productId, $form.serialize(), 'products/bulk-discount-rates', optionChangeCallback);
@@ -422,7 +434,6 @@ export default class ProductDetails extends ProductDetailsBase {
 
             // Open preview modal and update content
             if (this.previewModal) {
-                this.previewModal.open();
 
                 if (window.ApplePaySession) {
                     this.previewModal.$modal.addClass('apple-pay-supported');
