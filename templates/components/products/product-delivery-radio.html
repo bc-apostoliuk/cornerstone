@@ -1,6 +1,6 @@
 <div class="product-delivery-radio">
     <div class="product-delivery-radio__item">
-        <input type="radio" checked="checked" value="delivery" name="delivery" product-delivery-radio-change>
+        <input type="radio" value="delivery" name="delivery" product-delivery-radio-change>
         <label for="delivery"></label>
         <span class="product-delivery-radio__checkmark"></span>
         <div class="product-delivery-radio__item__content">
@@ -8,7 +8,7 @@
                 <div class="product-delivery-radio__item__title">Delivery</div>
             </div>
             <div class="product-delivery-radio__item__content--right">
-                <div class="product-delivery-radio__item__title product-delivery-radio__item__title--error">Out of stock</div>
+                <div id="delivery-stock" class="product-delivery-radio__item__title">Out of stock</div>
             </div>
         </div>
     </div>
@@ -28,10 +28,3 @@
         </div>
     </div>
 </div>
-
-<!-- {{inject 'testtest' product.price.without_tax.formatted}}
-
-<script>
-    var jsContext = JSON.parse({{jsContext}});
-    console.log('jsContext', jsContext)
-</script> -->

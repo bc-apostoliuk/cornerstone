@@ -188,6 +188,8 @@ export default class ProductDetailsBase {
                 $input: $('[name=qty\\[\\]]', $scope),
             },
             $bulkPricing: $('.productView-info-bulkPricing', $scope),
+            $productDeliveryRadio: $('.product-delivery-radio', $scope),
+            $deliveryMethod: $('[name="delivery"]', $scope),
         };
     }
 
@@ -270,6 +272,31 @@ export default class ProductDetailsBase {
         if (addToCartWrapper.is(':hidden') && data.purchasable) {
             addToCartWrapper.show();
         }
+
+        if (data.productLocation) {
+            this.updateDeliveryMethodView(viewModel, data.productLocation);
+        }
+
+    }
+
+    updateDeliveryMethodView(viewModel, data = {}) {
+        const { locationStock } = data;
+        const $stockLevelDelevery = $('#delivery-stock');
+        const baseClassName = 'product-delivery-radio__item__title';
+
+        const hasAvailableStock = locationStock > 0;
+
+        viewModel.$productDeliveryRadio.show();
+
+        if (hasAvailableStock) {
+            $stockLevelDelevery.text(`${locationStock} in stock`);
+        } else {
+            $(viewModel.$deliveryMethod[0]).prop('disabled', true);
+            $stockLevelDelevery.text(`! Out of stock`);
+        }
+
+        $stockLevelDelevery.addClass(`${baseClassName}--${hasAvailableStock ? 'success' : 'error'}`);
+        $stockLevelDelevery.removeClass(`${baseClassName}--${!hasAvailableStock ? 'success' : 'error'}`);
     }
 
     /**

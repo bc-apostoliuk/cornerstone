@@ -10,6 +10,7 @@ import { announceInputErrorMessage } from '../common/utils/form-utils';
 import forms from '../common/models/forms';
 import { normalizeFormData } from './utils/api';
 import { isBrowserIE, convertIntoArray } from './utils/ie-helpers';
+import { getProductInventory } from './utils/graphql-req';
 import bannerUtils from './utils/banner-utils';
 
 export default class ProductDetails extends ProductDetailsBase {
@@ -21,9 +22,11 @@ export default class ProductDetails extends ProductDetailsBase {
         this.imageGallery.init();
         this.listenQuantityChange();
         this.$swatchOptionMessage = $('.swatch-option-message');
+        this.$productDeliveryRadio = $('.product-delivery-radio');
         this.swatchInitMessageStorage = {};
         this.swatchGroupIdList = $('[id^="swatchGroup"]').map((_, group) => $(group).attr('id'));
         this.storeInitMessagesForSwatches();
+        this.isComplexProduct = this.context.product.options.some(({ state }) => state === 'variant_option');
 
         const $form = $('form[data-cart-item-add]', $scope);
 
@@ -72,6 +75,13 @@ export default class ProductDetails extends ProductDetailsBase {
             });
         }
 
+        if (this.isComplexProduct) {
+            this.$productDeliveryRadio.hide();
+
+        } else {
+            this.getProductStockForLocation();
+        }
+
         $productOptionsElement.on('change', event => {
             this.productOptionsChanged(event);
             this.setProductVariant();
@@ -84,7 +94,7 @@ export default class ProductDetails extends ProductDetailsBase {
                 // @todo: set as pick-up
             }
 
-            console.log(e.target.value);
+            console.log('deliveryMethodChange::::   ', e.target.value);
         })
 
         $form.on('submit', event => {
@@ -111,6 +121,20 @@ export default class ProductDetails extends ProductDetailsBase {
         $productOptionsElement.show();
 
         this.previewModal = modalFactory('#previewModal')[0];
+    }
+
+    getProductStockForLocation(params = {}) {
+        getProductInventory(this.context.token, {
+            productId: $('[name="product_id"]').val(),
+            locationId: 1,
+            ...params
+        }).then((data) => {
+            this.updateView({
+                productLocation: {
+                    locationStock: data.availableToSell
+                },
+            });
+        });
     }
 
     registerAddToCartValidation() {
@@ -259,6 +283,7 @@ export default class ProductDetails extends ProductDetailsBase {
         const $changedOption = $(event.target);
         const $form = $changedOption.parents('form');
         const productId = $('[name="product_id"]', $form).val();
+        const prferedLocationId = localStorage.getItem('prferedLocationId')
 
         // Do not trigger an ajax request if it's a file or if the browser doesn't support FormData
         if ($changedOption.attr('type') === 'file' || window.FormData === undefined) {
@@ -268,6 +293,9 @@ export default class ProductDetails extends ProductDetailsBase {
         utils.api.productAttributes.optionChange(productId, $form.serialize(), 'products/bulk-discount-rates', (err, response) => {
             const productAttributesData = response.data || {};
             const productAttributesContent = response.content || {};
+
+            this.getProductStockForLocation({ variantId: productAttributesData.v3_variant_id });
+
             this.updateProductAttributes(productAttributesData);
             this.updateView(productAttributesData, productAttributesContent);
             bannerUtils.dispatchProductBannerEvent(productAttributesData);

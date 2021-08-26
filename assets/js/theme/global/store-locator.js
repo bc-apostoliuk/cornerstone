@@ -2,6 +2,7 @@ import _ from 'lodash';
 import utils from '@bigcommerce/stencil-utils';
 import Popover from './stencil-popover.js';
 import urlUtils from '../common/utils/url-utils';
+// import modalFactory from '../global/modal';
 
 
 export default function ({ token }) {
@@ -93,6 +94,18 @@ export default function ({ token }) {
         return promise;
     };
 
+    // const storeLocatorModal = modalFactory('#store-locator-modal')[0];
+
+    // const trigger = document.getElementById('trigger');
+
+    // trigger.addEventListener('click', () => {
+    //     storeLocatorModal.open();
+    // });
+
+    // const $modalCloseBtn = $('#previewModal > .modal-close');
+
+    // $modalCloseBtn.on('click', () => storeLocatorModal.close());
+
     Promise.all([request, getUserLocation()]).then(([result, data]) => {
         const _data = result?.data?.inventory ? result : mockedLocations;
         const locations = getLocationsList(_data);
@@ -108,7 +121,6 @@ export default function ({ token }) {
         const preferredLocationId = getPreferedLocationId();
         const preferedLocation = getLocationById(preferredLocationId);
 
-        const trigger = document.getElementById('trigger');
         let popover = new Popover(trigger, { position: 'bottom' });
 
         setPreferredLocation(preferedLocation ? preferedLocation : defaultLocation);
@@ -187,9 +199,9 @@ export default function ({ token }) {
 
     };
 
-    const setPreferedLocationIdToLocalStorage = (id) => window.localStorage.setItem('peferedLocationId', id);
+    const setPreferedLocationIdToLocalStorage = (id) => window.localStorage.setItem('prferedLocationId', id);
 
-    const getPreferedLocationId = () => window.localStorage.getItem('peferedLocationId');
+    const getPreferedLocationId = () => window.localStorage.getItem('prferedLocationId');
 
     const getLocationsList = ({ data: { inventory: { locations: { edges } } } }) => {
         return edges.map(({ node }) => node);
