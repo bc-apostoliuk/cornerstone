@@ -1,7 +1,17 @@
 const getFilterIfNeeded = (value, key) => value ? `(${key || 'entityIds'}: ${value})` : '';
 const getNode = (obj) => obj?.edges[0].node;
 
-export const getProductInventory = (token, { variantId, productId, locationId }) => fetch('/graphql', {
+export const getProductInventory =
+    (
+        token,
+        {
+            variantId,
+            productId,
+            locationId
+        },
+        { filterByLocationId }
+    ) =>
+    fetch('/graphql', {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',
@@ -32,7 +42,7 @@ export const getProductInventory = (token, { variantId, productId, locationId })
                                 availableToSell
                                 warningLevel
                               }
-                              byLocation${getFilterIfNeeded(locationId, 'locationEntityIds')} {
+                              byLocation {
                                 edges {
                                   node {
                                     locationEntityId
@@ -83,20 +93,40 @@ export const getProductInventory = (token, { variantId, productId, locationId })
                                       "warningLevel": 0
                                     },
                                     "byLocation": {
-                                      "edges": [
-                                        {
-                                          "node": {
-                                            "locationEntityId": 1,
-                                            "locationEntityCode": "123",
-                                            "locationEntityTypeId": "PHYSICAL",
-                                            "availableToSell": 10,
-                                            "warningLevel": 0,
-                                            "isInStock": true
-                                          }
-                                        }
-                                      ]
+                                        "edges": [
+                                            {
+                                              "node": {
+                                                "locationEntityId": 1,
+                                                "locationEntityCode": "BC-LOCATION-1",
+                                                "locationEntityTypeId": "PHYSICAL",
+                                                "availableToSell": 10,
+                                                "warningLevel": 0,
+                                                "isInStock": true
+                                              }
+                                            },
+                                            {
+                                              "node": {
+                                                "locationEntityId": 5,
+                                                "locationEntityCode": "123213213124124321",
+                                                "locationEntityTypeId": "PHYSICAL",
+                                                "availableToSell": 50,
+                                                "warningLevel": 0,
+                                                "isInStock": true
+                                              }
+                                            },
+                                            {
+                                              "node": {
+                                                "locationEntityId": 6,
+                                                "locationEntityCode": "2423423432423",
+                                                "locationEntityTypeId": "PHYSICAL",
+                                                "availableToSell": 0,
+                                                "warningLevel": 0,
+                                                "isInStock": false
+                                              }
+                                            }
+                                          ]
                                     }
-                                  }
+                                  },
                                 }
                               }
                             ]
@@ -108,5 +138,18 @@ export const getProductInventory = (token, { variantId, productId, locationId })
                 }
     }})
     .then((data) => {
-        return getNode(getNode(getNode(data.site.products).variants).inventory.byLocation);
+        const locations = getNode(getNode(data.site.products).variants)
+            ?.inventory
+            ?.byLocation.edges;
+
+            window.locationsList = locations;
+
+            return {
+                delivery: locations.find(({ node: { locationEntityId } }) => {
+                    return locationEntityId === 1
+                })?.node,
+                pickup: locations.find(({ node: { locationEntityId } }) => {
+                    return Number(locationEntityId) === Number(filterByLocationId)
+                })?.node
+            }
     });

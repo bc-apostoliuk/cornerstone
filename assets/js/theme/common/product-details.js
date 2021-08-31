@@ -4,7 +4,7 @@ import 'foundation-sites/js/foundation/foundation';
 import 'foundation-sites/js/foundation/foundation.reveal';
 import ImageGallery from '../product/image-gallery';
 import modalFactory, { alertModal, showAlertModal } from '../global/modal';
-import { isEmpty, isPlainObject } from 'lodash';
+import { isEmpty, isPlainObject, times } from 'lodash';
 import nod from '../common/nod';
 import { announceInputErrorMessage } from '../common/utils/form-utils';
 import forms from '../common/models/forms';
@@ -79,7 +79,16 @@ export default class ProductDetails extends ProductDetailsBase {
             this.$productDeliveryRadio.hide();
 
         } else {
-            this.getProductStockForLocation();
+            const prferedLocationId = localStorage.getItem('prferedLocationId');
+
+            this.getProductStockForLocation(null, { filterByLocationId: prferedLocationId }).then(({ delivery, pickup }) => {
+                this.updateView({
+                    productLocation: {
+                        locationStock: delivery?.availableToSell ?? 0,
+                        preferredLocationStock: pickup?.availableToSell ?? 0,
+                    },
+                });
+            });
         }
 
         $productOptionsElement.on('change', event => {
@@ -123,18 +132,11 @@ export default class ProductDetails extends ProductDetailsBase {
         this.previewModal = modalFactory('#previewModal')[0];
     }
 
-    getProductStockForLocation(params = {}) {
-        getProductInventory(this.context.token, {
+    getProductStockForLocation(params = {}, filters) {
+        return getProductInventory(this.context.token, {
             productId: $('[name="product_id"]').val(),
-            locationId: 1,
             ...params
-        }).then((data) => {
-            this.updateView({
-                productLocation: {
-                    locationStock: data.availableToSell
-                },
-            });
-        });
+        }, filters);
     }
 
     registerAddToCartValidation() {
@@ -294,7 +296,13 @@ export default class ProductDetails extends ProductDetailsBase {
             const productAttributesData = response.data || {};
             const productAttributesContent = response.content || {};
 
-            this.getProductStockForLocation({ variantId: productAttributesData.v3_variant_id });
+            this.getProductStockForLocation({ variantId: productAttributesData.v3_variant_id }, { filterByLocationId: prferedLocationId }).then((data) => {
+                this.updateView({
+                    productLocation: {
+                        locationStock: data?.availableToSell ?? 0
+                    },
+                });
+            });
 
             this.updateProductAttributes(productAttributesData);
             this.updateView(productAttributesData, productAttributesContent);

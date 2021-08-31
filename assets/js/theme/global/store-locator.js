@@ -94,18 +94,6 @@ export default function ({ token }) {
         return promise;
     };
 
-    // const storeLocatorModal = modalFactory('#store-locator-modal')[0];
-
-    // const trigger = document.getElementById('trigger');
-
-    // trigger.addEventListener('click', () => {
-    //     storeLocatorModal.open();
-    // });
-
-    // const $modalCloseBtn = $('#previewModal > .modal-close');
-
-    // $modalCloseBtn.on('click', () => storeLocatorModal.close());
-
     Promise.all([request, getUserLocation()]).then(([result, data]) => {
         const _data = result?.data?.inventory ? result : mockedLocations;
         const locations = getLocationsList(_data);
@@ -184,12 +172,35 @@ export default function ({ token }) {
 
     const getSetPreferredButtonNode = () => document.getElementById('set-preferred-location-button');
 
+    const getWeekDayByIdx = (idx) => ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"][idx];
+    const getNowWeekDay = () => {
+        const date = new Date();
+
+        return getWeekDayByIdx(date.getDay());
+    }
+
     const setPreferredLocation = (location) => {
         const locationBlock = document.getElementById('store-locator-city');
         const storeLocatorButtonLabel = document.getElementById('store-locator-toggler-label');
 
-        setPreferedLocationIdToLocalStorage(location.entityId);
+        const $pickupAddress = $('#pick-up-address');
+        const $stockLevelPreferredLocation = $('#preferred-location-stock');
+        const baseClassName = 'product-delivery-radio__item__title';
+        const operatingHours = location.operatingHours[getNowWeekDay()];
+        const availableToSell = (window.locationsList || []).find(({ node: { locationEntityId } }) => locationEntityId === location.entityId)?.node.availableToSell
 
+        $pickupAddress.text(`${location.address.address1},
+            ${operatingHours.open
+                ? `open until ${operatingHours?.closing}`
+                : `currently closed`}`
+        );
+        $stockLevelPreferredLocation.text(availableToSell ? `${availableToSell} in stock`: '! Out of stock');
+
+
+        $stockLevelPreferredLocation.addClass(`${baseClassName}--${availableToSell ? 'success' : 'error'}`);
+        $stockLevelPreferredLocation.removeClass(`${baseClassName}--${!availableToSell ? 'success' : 'error'}`);
+        
+        setPreferedLocationIdToLocalStorage(location.entityId);
 
         storeLocatorButtonLabel.innerHTML = location.address.city;
 
@@ -304,7 +315,7 @@ const mockedLocations = {
             },
             {
                 "node": {
-                "entityId": 29,
+                "entityId": 6,
                 "code": "123123",
                 "description": null,
                 "label": "Test",
@@ -361,7 +372,7 @@ const mockedLocations = {
             },
             {
                 "node": {
-                "entityId": 31,
+                "entityId": 5,
                 "code": "1231234535435",
                 "description": null,
                 "label": "Test",

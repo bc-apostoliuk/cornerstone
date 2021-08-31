@@ -280,20 +280,30 @@ export default class ProductDetailsBase {
     }
 
     updateDeliveryMethodView(viewModel, data = {}) {
-        const { locationStock } = data;
+        const { locationStock, preferredLocationStock } = data;
         const $stockLevelDelevery = $('#delivery-stock');
+        const $stockLevelPreferredLocation = $('#preferred-location-stock');
         const baseClassName = 'product-delivery-radio__item__title';
-
         const hasAvailableStock = locationStock > 0;
+        const hasPreferredLocationAvailableStock = preferredLocationStock > 0;
 
         viewModel.$productDeliveryRadio.show();
 
         if (hasAvailableStock) {
             $stockLevelDelevery.text(`${locationStock} in stock`);
+            $(viewModel.$deliveryMethod[0]).prop('disabled', false);
         } else {
             $(viewModel.$deliveryMethod[0]).prop('disabled', true);
-            $stockLevelDelevery.text(`! Out of stock`);
+            $stockLevelDelevery.text(`! ${this.context.product.out_of_stock_message || 'Out of stock'}`);
         }
+
+        if (hasPreferredLocationAvailableStock) {
+            $stockLevelPreferredLocation.text(`${preferredLocationStock} in stock`);
+        } else {
+            $stockLevelPreferredLocation.text(`! ${this.context.product.out_of_stock_message || 'Out of stock'}`);
+        }
+
+
 
         $stockLevelDelevery.addClass(`${baseClassName}--${hasAvailableStock ? 'success' : 'error'}`);
         $stockLevelDelevery.removeClass(`${baseClassName}--${!hasAvailableStock ? 'success' : 'error'}`);

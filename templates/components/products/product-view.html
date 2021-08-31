@@ -267,3 +267,11 @@
     <div class="modal-content"></div>
     <div class="loadingOverlay"></div>
 </div>
+
+{{inject "product" product}}
+<script>
+    // Note the lack of quotes around the jsContext handlebars helper, it becomes a string automatically.
+    var jsContext = JSON.parse({{jsContext}}); // jsContext would output "{\"myProductName\": \"Sample Product\"}" which can feed directly into your JavaScript
+    
+    console.log(jsContext.product); // Will output: Sample Product
+</script>
