@@ -176,7 +176,7 @@ export default function ({ token }) {
         const locationBlock = document.getElementById('store-locator-city');
         const storeLocatorButtonLabel = document.getElementById('store-locator-toggler-label');
 
-        setPreferedLocationIdToLocalStorage(location.entityId);
+        // setPreferedLocationIdToLocalStorage(location.entityId);
 
 
         storeLocatorButtonLabel.innerHTML = location.address.city;
@@ -187,9 +187,9 @@ export default function ({ token }) {
 
     };
 
-    const setPreferedLocationIdToLocalStorage = (id) => window.localStorage.setItem('peferedLocationId', id);
+    const setPreferedLocationIdToLocalStorage = (id) => window.localStorage.setItem('preferredLocationId', id);
 
-    const getPreferedLocationId = () => window.localStorage.getItem('peferedLocationId');
+    const getPreferedLocationId = () => window.localStorage.getItem('preferredLocationId');
 
     const getLocationsList = ({ data: { inventory: { locations: { edges } } } }) => {
         return edges.map(({ node }) => node);

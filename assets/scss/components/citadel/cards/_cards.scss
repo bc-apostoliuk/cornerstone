@@ -167,3 +167,15 @@
         }
     }
 }
+
+.stock-level-by-location {
+    &--success {
+        color: green;
+    }
+    &--error {
+        color: red;
+    }
+    &--warn {
+        color: #777;
+    }
+}
