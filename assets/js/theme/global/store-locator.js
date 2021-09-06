@@ -1,10 +1,11 @@
 import _ from 'lodash';
-import utils from '@bigcommerce/stencil-utils';
 import Popover from './stencil-popover.js';
-import urlUtils from '../common/utils/url-utils';
-
+import { populateProductsWithStockLevel } from '../common/utils/products-listing.js';
 
 export default function ({ token }) {
+    // @todo: should be moved to the seperate file;
+    populateProductsWithStockLevel(token);
+
     const request = fetch('/graphql', {
         method: 'POST',
         headers: {
