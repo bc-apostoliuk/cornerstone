@@ -18,11 +18,11 @@ export const mergeArrays = (...arrays) => {
 };
 
 export const populateProductsWithStockLevel = (token) => {
-    // const preferredLocationId = Number(window.localStorage.getItem('preferredLocationId'));
-    const preferredLocationId = '';
+    const preferredLocationId = Number(window.localStorage.getItem('preferredLocationId'));
+    // const preferredLocationId = '';
     const $productsStockLevelBlock = $('.card #stock-level-by-location');
 
-    getAllProducts(preferredLocationId, token, true).then(({ data : { site: { products }, inventory }}) => {
+    return getAllProducts(preferredLocationId, token).then(({ data : { site: { products }, inventory }}) => {
         console.log('products', products, inventory);
         const preferredlocationData = inventory.locations.edges.find(({ node: { entityId } }) => entityId === preferredLocationId);
 
@@ -82,5 +82,7 @@ export const populateProductsWithStockLevel = (token) => {
             $stockLevelDelivery.addClass(aggregatedByVariants.default > 0 ? 'stock-level-by-location--success' : 'stock-level-by-location--error');
 
         });
+
+        return inventory.locations;
     });
 }
