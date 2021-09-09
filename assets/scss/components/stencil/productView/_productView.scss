@@ -436,3 +436,14 @@
         width: auto;
     }
 }
+
+.delivery-method-item {
+    &-title {
+        font-weight: bold;
+    }
+    &-descr {
+        &-stock {
+            color: green;
+        }
+    }
+}

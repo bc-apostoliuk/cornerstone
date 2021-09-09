@@ -236,6 +236,27 @@
                         <span data-product-stock>{{product.stock_level}}</span>
                     </label>
                 </div>
+                <div>
+                    <label class="form-label form-label--alternate">Available for</label>
+                    <div class="delivery-method-item">
+                        <div class="delivery-method-item-title">
+                            Delivery
+                        </div>
+                        <div class="delivery-method-item-descr">
+                            <span id="delivery-stock" class="delivery-method-item-descr-stock"></span>
+                        </div>
+                    </div>
+                    <div class="delivery-method-item">
+                        <div class="delivery-method-item-title">
+                            Pickup in store
+                        </div>
+                        <div class="delivery-method-item-descr">
+                            <span id="pickup-stock" class="delivery-method-item-descr-stock"></span>
+                            <span id="pickup-stock-info" class="delivery-method-item-descr-info"></span>
+                            <a id="change-store-button" class="delivery-method-item-descr-btn">Change store</a>
+                        </div>
+                    </div>
+                </div>
                 {{> components/products/add-to-cart}}
                 {{#if product.out_of_stock}}
                     {{#if product.out_of_stock_message}}

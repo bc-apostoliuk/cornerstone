@@ -951,7 +951,7 @@ export const getAllProducts = (locationId, token, mock) => {
                                       "locationEntityId": 6,
                                       "locationEntityCode": "2423423432423",
                                       "locationEntityTypeId": "PHYSICAL",
-                                      "availableToSell": 0,
+                                      "availableToSell": 33,
                                       "warningLevel": 0,
                                       "isInStock": false
                                     }
@@ -970,7 +970,63 @@ export const getAllProducts = (locationId, token, mock) => {
                               }
                             }
                           }
-                        }
+                        },
+                        {
+                            "node": {
+                              "entityId": 799,
+                              "sku": "SM13",
+                              "inventory": {
+                                "aggregated": {
+                                  "availableToSell": 55,
+                                  "warningLevel": 0
+                                },
+                                "byLocation": {
+                                  "edges": [
+                                    {
+                                      "node": {
+                                        "locationEntityId": 1,
+                                        "locationEntityCode": "BC-LOCATION-1",
+                                        "locationEntityTypeId": "PHYSICAL",
+                                        "availableToSell": 15,
+                                        "warningLevel": 0,
+                                        "isInStock": true
+                                      }
+                                    },
+                                    {
+                                      "node": {
+                                        "locationEntityId": 5,
+                                        "locationEntityCode": "123213213124124321",
+                                        "locationEntityTypeId": "PHYSICAL",
+                                        "availableToSell": 10,
+                                        "warningLevel": 0,
+                                        "isInStock": true
+                                      }
+                                    },
+                                    {
+                                      "node": {
+                                        "locationEntityId": 6,
+                                        "locationEntityCode": "2423423432423",
+                                        "locationEntityTypeId": "PHYSICAL",
+                                        "availableToSell": 87,
+                                        "warningLevel": 0,
+                                        "isInStock": false
+                                      }
+                                    },
+                                    {
+                                      "node": {
+                                        "locationEntityId": 7,
+                                        "locationEntityCode": "12323512421",
+                                        "locationEntityTypeId": "PHYSICAL",
+                                        "availableToSell": 0,
+                                        "warningLevel": 0,
+                                        "isInStock": false
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
                       ]
                     }
                   }

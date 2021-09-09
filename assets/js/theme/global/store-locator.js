@@ -54,12 +54,14 @@ const groupeLocaions = (edges) => edges.reduce((accum, item) => {
 }, {});
 
 export default function ({ token }) {
+    const $modal = modalFactory('#modal')[0];
+    const trigger = $('#store-locator-button');
     const activePreferredId = Number(localStorage.getItem('preferredLocationId'));
 
+    // DEFINING THE LABEL
     if (activePreferredId) {
         $('#store-locator-default-label').hide();
     }
-    // DEFINING THE LABEL
     const address = localStorage.getItem('preferredLocationAddress');
 
     $('.store-locator-toggler-label-location').html(address);
@@ -76,12 +78,15 @@ export default function ({ token }) {
         const getLocationsListTemplate = (withGrouping = true, locations = []) => Object.entries(groupeLocaions(locations)).map(([key, value]) => {
             const locationItems = value.map(({ entityId, label, address }) =>
                 `<div id="location-${entityId}" class="location-item">
-                    <div>
-                        <div class="location-item-title">${label}</div>
-                        <div class="location-item-info">${address.address1}</div>
-                        <div class="location-item-info">${address.city}</div>
+                    <div class="location-item-content">
+                        <div>
+                            <div class="location-item-title">${label}</div>
+                            <div class="location-item-info">${address.address1}</div>
+                            <div class="location-item-info">${address.city}</div>
+                        </div>
+                        ${activePreferredId === entityId ? 'Selected' : `<button id="location-${entityId}" class="button shop-here-button">Shop here</button>`}
                     </div>
-                    ${activePreferredId === entityId ? 'Selected' : `<button id="location-${entityId}" class="button shop-here-button">Shop here</button>`}
+                    <span class="location-item-description"></span>
                 </div>`
             ).join('');
 
@@ -226,7 +231,4 @@ export default function ({ token }) {
     
         });
     });
-
-    const $modal = modalFactory('#modal')[0];
-    const trigger = $('#store-locator-button');
 };

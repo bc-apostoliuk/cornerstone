@@ -56,12 +56,22 @@
 }
 
 .location-item {
-    display: flex;
-    justify-content: space-between;
     border-bottom: 1px solid #e5e5e5;
     padding: 15px 25px;
     cursor: pointer;
-    align-items: center;
+
+    &-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    &-description {
+        color: green;
+        &--error {
+            color: red;
+        }
+    }
 
     & > .shop-here-button {
         margin: 0;
@@ -104,6 +114,16 @@
 
             margin-bottom: 5px;
         }
+    }
+}
+
+.delivery-method {
+    &-title {
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+    &-item {
+        margin-bottom: 5px;
     }
 }
 
