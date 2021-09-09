@@ -191,7 +191,7 @@ export default function ({ token }) {
                 $(`#${this.id}`).addClass('location-item--active');
 
                 if (locationDetails) {
-                    const { operatingHours, address: { phone } } = locationDetails;
+                    const { operatingHours, address: { phone }, timeZone } = locationDetails;
                     const $detailsBlock = $('.location-details');
 
                     const openingHoursItemsTemplate = Object.entries(operatingHours).map(([day, value]) => {
@@ -213,6 +213,7 @@ export default function ({ token }) {
 
                     const openingHoursTemplate = `
                         <div class="location-details-section opening-hours-section">
+                        <div class="location-item-title">${timeZone ? `Time zone: ${timeZone}` : ''}</div>
                             <div class="location-item-title">Store hours</div>
                             ${openingHoursItemsTemplate}
                         </div>
